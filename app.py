@@ -1,64 +1,89 @@
 import streamlit as st
 import pickle
 import numpy as np
-from streamlit_lottie import st_lottie
 import requests
+from streamlit_lottie import st_lottie
 
-# ---------------------- PAGE CONFIG ----------------------
-st.set_page_config(page_title="ML Prediction App", page_icon="🚀", layout="centered")
+# ------------------ PAGE CONFIG ------------------
+st.set_page_config(
+    page_title="AI Prediction App",
+    page_icon="🚀",
+    layout="centered"
+)
 
-# ---------------------- LOAD MODEL ----------------------
+# ------------------ LOAD MODEL ------------------
 model = pickle.load(open("Modelli.pkl", "rb"))
 
-# ---------------------- LOTTIE ANIMATION ----------------------
-def load_lottieurl(url):
+# ------------------ LOTTIE FUNCTION ------------------
+def load_lottie(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
 
-lottie_ai = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_kyu7xb1v.json")
+# Animation URL
+lottie_animation = load_lottie("https://assets5.lottiefiles.com/packages/lf20_zrqthn6o.json")
 
-# ---------------------- CUSTOM CSS ----------------------
+# ------------------ CUSTOM CSS ------------------
 st.markdown("""
     <style>
-    .main {
-        background: linear-gradient(to right, #667eea, #764ba2);
+    .stApp {
+        background: linear-gradient(to right, #141E30, #243B55);
+        color: white;
+    }
+    h1 {
+        text-align: center;
+        color: #00FFD1;
     }
     .stButton>button {
-        background-color: #ff4b4b;
-        color: white;
-        border-radius: 10px;
+        background: linear-gradient(to right, #00FFD1, #00C9A7);
+        color: black;
+        font-size: 18px;
+        border-radius: 12px;
         height: 3em;
         width: 100%;
-        font-size: 18px;
     }
-    .stTextInput>div>div>input {
+    .stNumberInput input {
         border-radius: 10px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------------------- TITLE ----------------------
-st.title("🤖 ML Prediction App")
-st.write("Enter input values to get prediction")
+# ------------------ TITLE ------------------
+st.title("🤖 AI Prediction App")
+st.write("### Enter your data below")
 
-# ---------------------- ANIMATION ----------------------
-st_lottie(lottie_ai, height=200)
+# ------------------ ANIMATION ------------------
+if lottie_animation:
+    st_lottie(lottie_animation, height=200)
 
-# ---------------------- INPUT FIELDS ----------------------
-# Change these based on your model features
-feature1 = st.number_input("Feature 1", value=0.0)
-feature2 = st.number_input("Feature 2", value=0.0)
-feature3 = st.number_input("Feature 3", value=0.0)
+# ------------------ INPUT SECTION ------------------
+st.subheader("📥 Input Features")
 
-# ---------------------- PREDICTION ----------------------
-if st.button("🔮 Predict"):
-    input_data = np.array([[feature1, feature2, feature3]])
-    prediction = model.predict(input_data)
+# 👉 CHANGE NUMBER OF FEATURES HERE if needed
+num_features = 3  
 
-    st.success(f"✅ Prediction: {prediction[0]}")
+inputs = []
+cols = st.columns(num_features)
 
-# ---------------------- FOOTER ----------------------
+for i in range(num_features):
+    with cols[i]:
+        value = st.number_input(f"Feature {i+1}", value=0.0)
+        inputs.append(value)
+
+# ------------------ PREDICTION ------------------
+st.markdown("### 🔍 Prediction")
+
+if st.button("🚀 Predict"):
+    try:
+        input_array = np.array([inputs])
+        prediction = model.predict(input_array)
+
+        st.success(f"✅ Prediction: {prediction[0]}")
+
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
+
+# ------------------ FOOTER ------------------
 st.markdown("---")
-st.write("Made with ❤️ using Streamlit")
+st.markdown("<center>Made with ❤️ using Streamlit</center>", unsafe_allow_html=True)
